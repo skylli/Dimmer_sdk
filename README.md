@@ -1,7 +1,7 @@
 <!--
  * @Author: Micheal
  * @Date: 2020-02-22 15:40:21
- * @LastEditTime: 2021-02-04 21:21:38
+ * @LastEditTime: 2021-02-04 21:26:07
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \mqtt_example\README.md
@@ -39,7 +39,7 @@ CONFIG_ESPTOOLPY_PORT="COM4"
 ```
 ### Buring and monitor 
 ```shell
-cmd sdk_path
+cd  sdk_path
 make flash monitor 
 ```
     "make flash monitor" will flash the firmware to the esp32 and open serial port to print the log.
@@ -73,11 +73,12 @@ void _device_event_register(void){
 ### MQTT package receive and respond
 1) In file `mesh_thincloud.c`: function `tc_sub_device_command` will subscribe all the topic from tc and register an callback function 
 
-```
+```c
 rc =  aws_iot_mqtt_subscribe(   tc.p_mclient, p_tab->p_topic_sub_cmd, strlen(p_tab->p_topic_sub_cmd),\
 										QOS0,  _tc_sub_dev_cmd_cb, NULL);
 ```
 All the notify from Tc will receive and handle in function `_tc_sub_dev_cmd_cb` which will check the list( mesh list that incloud all the node's mac ) and send a json to mesh in functiton `_handle_event_command` like 
+
 ```json
 	{
 	  "request":"update_state",//  tc command
@@ -86,8 +87,10 @@ All the notify from Tc will receive and handle in function `_tc_sub_dev_cmd_cb` 
 	  "data": {"power":1,"timer":"00:00:00","name":"demo","type":"","brightness":50,"fade":1.02,"vacationmode":1,"remote_id":"02-xx","learn":true}
 	}
 ```
+
    In file `light_handle.c`, `_mlink_handle_function_register` function have register a function `_mlink_update_state` to handle mesh package `"request":"update_state"`, so `_mlink_update_state` will handle the Tc command  `update_state` and creat an respond package to the root which will relay to the TC.
-```
+
+```c 
 static void _mlink_handle_function_register(void){
     ...
   MDF_ERROR_ASSERT(mlink_set_handle("update_state", _mlink_update_state));
@@ -102,7 +105,7 @@ Schedule and Alarm was conver to `Sch_t` and save in flash.
 Device will return an schedule id, which was creat by the effective time, so if there are two schedule have the same active time, device will return the same id, and the new schedule will cover the old schedule.
 Function `_sch_loop_detect` will constantly judge whether to switch to a new schedule and trigger an alarm. Array `next_secend` always stores the time of the next schedule and alarm. `_sch_active_` function will active the new schedle  once the time is come and read flash to update array `next_secend` to the next time, so that we only need to read the flash once, which was very time consuming.
 
-  ```c
+```c
   typedef struct SCHEDULE_HAD_T{
 	uint64_t time_id; // 0123456786400 =  1234567(week) + 86400(time in seconds) + 01 (00  alarm)，11(tu) 12(td)13(dtu) ..
 	uint8_t bri;
@@ -117,13 +120,14 @@ Function `_sch_loop_detect` will constantly judge whether to switch to a new sch
 	uint16_t data_len;
 	uint8_t *p_data;
 }Sch_t;
-  ```
+  
+```
 
 ### Sample: config dimmer fade
 Dimmer fade( Hold the buttom to dimmer the light ) was Macro definition in file `light_device.c` which value cann't be change.
 If we want to change the dimmer fade in `update_state` command, we can follow the steps below to modify.
 In file `light_device.c`:
-```
+```c
 #define _FADE_DIMMER	(10000)	// dimmer fade
 change to 
 uint8_t _FADE_DIMMER = 10000;
@@ -237,5 +241,4 @@ After that we can use Postman to change dimmer fade to 20s:
     "dimmer_fade": 20000
   }
 }
-
 ```
