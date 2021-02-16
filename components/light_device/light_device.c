@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-02-04 17:08:45
+ * @LastEditTime: 2021-02-16 11:21:22
  * @LastEditors: Please set LastEditors
  * @Description: 设备信息，特性注册，接口提供
  * @FilePath: \mqtt_example\components\light_device\light_device.c
@@ -341,7 +341,7 @@ mdf_err_t light_change_raw(uint8_t *p_power, uint8_t *p_bri, uint32_t *p_fade, u
 	uint32_t ct = (uint32_t) utils_get_current_time_ms();
 	
 	// set fade
-	if(p_fade){
+	if( p_fade ){
 		light_fade_set(*p_fade);
 		old_fade = *p_fade;
 		if(NULL == p_power && NULL == p_bri)
@@ -698,7 +698,7 @@ mdf_err_t _get_network_config(mwifi_init_config_t *init_config, mwifi_config_t *
  *				obtain the network configuration information through the blufi or mconfig chain.
  *			3.Indicate the status of the device by means of a light
  */
-mdf_err_t light_get_wifi_config( ){
+mdf_err_t light_get_wifi_config(){
 
     mwifi_init_config_t init_config   = MWIFI_INIT_CONFIG_DEFAULT();
 
