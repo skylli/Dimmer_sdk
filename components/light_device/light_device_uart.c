@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-02-04 17:01:56
+ * @LastEditTime: 2021-02-18 14:27:56
  * @LastEditors: Please set LastEditors
  * @Description:  uart 相关
  * @FilePath: \mqtt_example\components\light_device\light_device_uart.c
@@ -230,7 +230,7 @@ int uart_recv_handle(void){
 	remain_len = rec_len;
 	while( NULL != p_next && remain_len > sizeof(Uart_msg_t )){
 
-		//utlis_byte_printf("Uart remain ", (uint8_t *)p_next, remain_len);
+		utlis_byte_printf("Uart remain ", (uint8_t *)p_next, remain_len);
 		p_u = (Uart_msg_t *) p_next;
 
 		//MDF_LOGD("version %us\n", p_u->head);
@@ -297,7 +297,7 @@ int uart_recv_handle(void){
 int uart_send(const char *p_data, size_t data_len){
 
 	MDF_ERROR_CHECK( NULL == p_data || data_len == 0, 0, "Inval data and size.\n");
-	//utlis_byte_printf("uart send ", (uint8_t *)p_data, (int)data_len);
+	utlis_byte_printf("uart send ", (uint8_t *)p_data, (int)data_len);
 
 	return	uart_write_bytes(UART_NUM_1,  p_data, data_len); 
 }
@@ -321,7 +321,7 @@ int uart_cmd_send(Uart_cmd cmd, void *p_data){
 mdf_err_t _uart_init(void){
 
 	
-    esp_log_level_set(TAG, ESP_LOG_INFO);
+    esp_log_level_set(TAG, ESP_LOG_DEBUG);
 	uart_config_t uart_config = {
 		.baud_rate = 9600,
 		.data_bits = UART_DATA_8_BITS,

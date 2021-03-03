@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2020-03-09 18:53:03
+ * @LastEditTime: 2021-03-03 16:23:04
  * @LastEditors: Please set LastEditors
  * @Description: ota
  * @FilePath: \mqtt_example\components\light_device\_LIGHT_SCHEDULE_H.c
@@ -713,7 +713,7 @@ static mdf_err_t _sch_list_remove(_Sch_type_t type, uint64_t del_id){
 		//if( MDF_OK ==  mdf_info_save( _p_sch_key[type], p_list, (size_t) wlen ) ){
 		if( MDF_OK ==  utlis_store_save(US_SPA_SCH,  _p_sch_key[type], p_list, (size_t) wlen )  ){
 
-			MDF_LOGE("save modify  %s \n", _p_sch_key[type]);
+			MDF_LOGD("save modify  %s \n", _p_sch_key[type]);
 			_ctl_nums_decrease(type);
 			return MDF_OK;
 		}
@@ -1354,7 +1354,7 @@ static mdf_err_t _tapsch_single_get(char **pp_tap, int *p_tap_len, Item_t *p_ite
 		}
 	}
 	if(p_json)	
-		_sch_starttime2json(&p_json, t_id);
+		_sch_starttime2json(&p_json, p_item->sch_time_key);
 
 	// get name 
 	item_sub_json_get(&p_json, _SCH_CMD_TAP, p_item);
@@ -1422,14 +1422,13 @@ static mdf_err_t _tapsch_del(_Sch_type_t type, int del_all, char **pp_respond , 
 
 	if( 0 == del_all && NULL == p_del_id)
 		return rc;
-	
 	p_sch_list = _sch_List_t_get( type );
 	MDF_ERROR_CHECK( NULL == p_sch_list && ( *pp_error = (char *)malloc_copy_str("Failt read schedule"), 1 ) ,
 		MDF_FAIL, "Failt read schedule\n");
 	
 	nums = _ctl_nums_get( type );
 
-	
+	MDF_LOGD("nums %d", nums);
 	for( i=0; i< nums; i++){
 		
 		if( del_all || _tapsch_id_in_array( p_sch_list->p_list[i].sch_time_key, p_del_id, del_len) ){

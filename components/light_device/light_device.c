@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-02-16 11:21:22
+ * @LastEditTime: 2021-02-20 09:26:04
  * @LastEditors: Please set LastEditors
  * @Description: 设备信息，特性注册，接口提供
  * @FilePath: \mqtt_example\components\light_device\light_device.c
@@ -346,9 +346,10 @@ mdf_err_t light_change_raw(uint8_t *p_power, uint8_t *p_bri, uint32_t *p_fade, u
 		old_fade = *p_fade;
 		if(NULL == p_power && NULL == p_bri)
 			uart_cmd_send(UART_CMD_FADE, (void *)&old_fade );
-		MDF_LOGD("fade = %d \n", *p_fade);
 	}
 	old_fade = light_fade_get();
+	MDF_LOGE("fade = %d ms \n", old_fade);
+
 	// set power
 	// set bri
 	if(p_power)
@@ -365,10 +366,18 @@ mdf_err_t light_change_raw(uint8_t *p_power, uint8_t *p_bri, uint32_t *p_fade, u
 		
 		uart_cmd_send(UART_CMD_BRI, (void *)tmp);
 	}else 	if( p_power  ){
-	
+		uint8_t bri = (*p_power == 0) ? 0:0xff;
+#if 1
 		tmp[0] = *p_power;
 		memcpy(&tmp[1], &old_fade, sizeof(uint32_t) );
 		uart_cmd_send(UART_CMD_STATUS, (void *)tmp);
+#endif
+#if 0	
+		tmp[0] = bri;
+		memcpy(&tmp[1], &old_fade, sizeof(uint32_t) );
+		light_bri_set(bri);
+		uart_cmd_send(UART_CMD_BRI, (void *)tmp);
+#endif
 		light_power_set( *p_power );
 	} 
 		// set dimmser
@@ -872,7 +881,7 @@ static mdf_err_t _event_handle_button_td(Evt_mesh_t *p_evt)
 	//light_change_user(0, 0, 1.2, -1);
 	MDF_LOGW("_event_handle_button_td \n");
 	
-	if( -1 == tap_event_active(_SCH_TAP_TD, 1000) )
+	if( -1 == tap_event_active(_SCH_TAP_TD, -1) )
 		light_change_user(0, 5, 0, -1);
 		//light_change_user(0, 0, 1.2, -1);
 
@@ -892,7 +901,7 @@ static mdf_err_t _event_handle_button_dtd(Evt_mesh_t *p_evt)
 {
 	
 	//light_change_user(0, 0, 0, -1);
-	if( -1 == tap_event_active(_SCH_TAP_DTD, 1000) )
+	if( -1 == tap_event_active(_SCH_TAP_DTD, -1) )
 		light_change_user(0, 0, 0, -1);
 	MDF_LOGW("_event_handle_button_dtd \n");
 	return MDF_OK;

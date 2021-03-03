@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-02-14 10:53:30
+ * @LastEditTime: 2021-02-18 11:15:24
  * @LastEditors: Please set LastEditors
  * @Description: 设备对外的 api 接口实现
  * @FilePath: \mqtt_example\components\light_device\light_handle.c
@@ -997,7 +997,7 @@ mdf_err_t light_device_init(){
 	//  add default name
     esp_wifi_get_mac(ESP_IF_WIFI_STA, self_mac);
 	sprintf((char *)p_name, _MAC_STR_FORMAT, PR_MAC2STR(self_mac) );
-	// todo set CONFIG_LIGHT_VERSION
+	// todo set CONFIG_LIGHT_VERSIONP
 	// todo  
     MDF_ERROR_ASSERT( mlink_add_device(MWIFI_ID, (const char *)p_name, "V0.7.00" ));
 
@@ -1006,10 +1006,10 @@ mdf_err_t light_device_init(){
 	// todo.
 	schedule_init();
 	// add device characteristic
-    MDF_ERROR_ASSERT(mlink_add_characteristic(LIGHT_CID_POWER, "power", CHARACTERISTIC_FORMAT_INT, CHARACTERISTIC_PERMS_RWT, 0, 1, 1));
-    MDF_ERROR_ASSERT(mlink_add_characteristic(LIGHT_CID_BRI, "brightness", CHARACTERISTIC_FORMAT_INT, CHARACTERISTIC_PERMS_RWT, 0, 100, 1));
-    MDF_ERROR_ASSERT(mlink_add_characteristic(LIGHT_CID_FADE, "fade", CHARACTERISTIC_FORMAT_DOUBLE, CHARACTERISTIC_PERMS_RWT, 0, 10,  0));
-	MDF_ERROR_ASSERT(mlink_add_characteristic(LIGHT_CID_SHUTDOWN_TIME, "shutdown_time_ms", CHARACTERISTIC_FORMAT_INT, CHARACTERISTIC_PERMS_RWT, 0, 3600, 1));
+    MDF_ERROR_ASSERT( mlink_add_characteristic(LIGHT_CID_POWER, "power", CHARACTERISTIC_FORMAT_INT, CHARACTERISTIC_PERMS_RWT, 0, 1, 1));
+    MDF_ERROR_ASSERT( mlink_add_characteristic(LIGHT_CID_BRI, "brightness", CHARACTERISTIC_FORMAT_INT, CHARACTERISTIC_PERMS_RWT, 0, 100, 1));
+    MDF_ERROR_ASSERT( mlink_add_characteristic(LIGHT_CID_FADE, "fade", CHARACTERISTIC_FORMAT_DOUBLE, CHARACTERISTIC_PERMS_RWT, 0, 10,  0));
+	MDF_ERROR_ASSERT( mlink_add_characteristic(LIGHT_CID_SHUTDOWN_TIME, "shutdown_time_ms", CHARACTERISTIC_FORMAT_INT, CHARACTERISTIC_PERMS_RWT, 0, 3600, 1));
 	
 	// 初始化 queue 事件
 	mevt_init(); // event init 
