@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-02-20 09:26:04
+ * @LastEditTime: 2021-03-29 17:58:40
  * @LastEditors: Please set LastEditors
  * @Description: 设备信息，特性注册，接口提供
  * @FilePath: \mqtt_example\components\light_device\light_device.c
@@ -121,6 +121,7 @@ int light_min_bri_get(void){
 	return MDF_OK;
 }
  uint8_t light_bri_get(void){
+	 MDF_LOGD("get bri %u \n", light.bri);
 	return light.bri;
 }
 int light_bri_user_get(void){
@@ -348,7 +349,7 @@ mdf_err_t light_change_raw(uint8_t *p_power, uint8_t *p_bri, uint32_t *p_fade, u
 			uart_cmd_send(UART_CMD_FADE, (void *)&old_fade );
 	}
 	old_fade = light_fade_get();
-	MDF_LOGE("fade = %d ms \n", old_fade);
+	MDF_LOGD("fade = %d ms \n", old_fade);
 
 	// set power
 	// set bri
@@ -357,7 +358,7 @@ mdf_err_t light_change_raw(uint8_t *p_power, uint8_t *p_bri, uint32_t *p_fade, u
 	if(   p_bri && power !=0 ){
 		tmp[0] = *p_bri;
 		memcpy(&tmp[1], &old_fade, sizeof(uint32_t) );
-		light_bri_set(p_bri);
+		light_bri_set( *p_bri) ;
 		if(*p_bri ==  0  ){
 			light_power_set( 0 );
 		}else{
@@ -427,11 +428,11 @@ mdf_err_t light_change_user(int power_s, int bri_s, float fade_s, int dimmer_s){
 		}
 	if(bri_s >= 0 ){
 		int min_bri = light_min_bri_get();
-		float f_bri = ( ( (100.0 - min_bri) * bri_s) / 100.0  + min_bri ) * ( (255.0 )/100.0);
+		float f_bri = ( ( (100.0 - min_bri) * bri_s) / 100.0  + min_bri ) * ( (255.0 )/100.0) ;
 		//bri =( (  (int)(f_bri *10) % 10) > 5 ?((uint8_t)f_bri + 1): (uint8_t)f_bri );
-		bri = (int)f_bri;
+		bri = (uint8_t)f_bri;
 		p_bri = &bri;
-		MDF_LOGD("mim bri %d bri %u \n",  (255 *  min_bri / 100), bri);
+		MDF_LOGD("bri_s = %d mim bri %d bri %u \n", bri_s, (255 *  min_bri / 100), *p_bri);
 		
 		if(p_power == NULL && bri_s == 0 ){
 			power = 0;
@@ -712,8 +713,8 @@ mdf_err_t light_get_wifi_config(){
     mwifi_init_config_t init_config   = MWIFI_INIT_CONFIG_DEFAULT();
 
 	mwifi_config_t ap_config     = {
-        //.router_ssid     = "showhome_office",//"showdow",//CONFIG_ROUTER_SSID,
-       	//.router_password = "showhome",//"!@#sky141516",//CONFIG_ROUTER_PASSWORD,
+        .router_ssid     = "showhome_root",//"showdow",//CONFIG_ROUTER_SSID,
+       	.router_password = "showhomeroot",//"!@#sky141516",//CONFIG_ROUTER_PASSWORD,
         .mesh_id         = CONFIG_MESH_ID,
         .mesh_password   = CONFIG_MESH_PASSWORD,
     };

@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-03-03 16:23:04
+ * @LastEditTime: 2021-03-29 19:14:59
  * @LastEditors: Please set LastEditors
  * @Description: ota
  * @FilePath: \mqtt_example\components\light_device\_LIGHT_SCHEDULE_H.c
@@ -161,6 +161,11 @@ typedef struct SCH_LIST_T{
 	_SCH_CMD_MAX
 }_Sch_type_t;
 #endif
+const char *_p_key_prifx[_SCH_CMD_MAX] = {
+	"A",
+	"T",
+	NULL
+};
 const char *_p_sch_key[_SCH_CMD_MAX] = {
 	"TC_ALARM",
 	"TC_TAP",
@@ -551,9 +556,9 @@ static inline void _ctl_position_set(_Sch_type_t type, uint8_t position){
 
 }
 
-static mdf_err_t _item_sub_add_save(_Sch_type_t stype, int index, const char *p_src){
+static mdf_err_t _item_sub_add_save(_Sch_type_t stype, uint64_t index, const char *p_src){
 	mdf_err_t rc = MDF_FAIL;
-	char p_key_str[32] = {0}, *p_name = NULL;
+	char p_key_str[64] = {0}, *p_name = NULL;
 	
 	MDF_PARAM_CHECK( p_src);
 	MDF_PARAM_CHECK( stype < _SCH_CMD_MAX);
@@ -567,7 +572,8 @@ static mdf_err_t _item_sub_add_save(_Sch_type_t stype, int index, const char *p_
 		p_sub->name_len = strlen( p_name);
 		memcpy(p_sub->p_name, p_name, p_sub->name_len);
 		
-		sprintf(p_key_str, "%s_%d",_p_sch_key[stype], index );
+		sprintf(p_key_str, "%s_%llu",_p_key_prifx[stype], index );
+		MDF_LOGE("name key is %s", p_key_str);
 		//mdf_info_save( p_key_str,  p_sub, sizeof( Item_sub_t ) + p_sub->name_len );
 		utlis_store_save(US_SPA_SCH, p_key_str, p_sub , sizeof( Item_sub_t ) + p_sub->name_len );
 
@@ -583,13 +589,13 @@ End:
 	
 	return rc;
 }
-static mdf_err_t item_sub_del(_Sch_type_t stype, int index){
+static mdf_err_t item_sub_del(_Sch_type_t stype, uint64_t index){
 	mdf_err_t rc = MDF_FAIL;
-	char p_key_str[32] = {0};
+	char p_key_str[64] = {0};
 
 	MDF_PARAM_CHECK( stype < _SCH_CMD_MAX);
 	
-	sprintf(p_key_str, "%s_%d", _p_sch_key[stype], index );
+	sprintf(p_key_str, "%s_%llu", _p_key_prifx[stype], index );
 	rc = mdf_info_erase( p_key_str);
 	
 	return rc;
@@ -598,11 +604,10 @@ static mdf_err_t item_sub_del(_Sch_type_t stype, int index){
 static mdf_err_t item_sub_json_get(char **pp_json, _Sch_type_t stype, Item_t *p_item){
 	mdf_err_t rc = MDF_FAIL;
 	int len = 0;
-	char p_key[32] = {0};
+	char p_key[64] = {0};
 	Item_sub_t *p_sub = NULL;
 
-	sprintf(p_key, "%s_%d", _p_sch_key[stype], p_item->idx);
-
+	sprintf(p_key, "%s_%llu", _p_key_prifx[stype], p_item->sch_time_key);
 	//p_sub = utlis_info_load(p_key, &len);
 	utlis_store_blob_get(US_SPA_SCH, p_key, (void **)&p_sub,(size_t *) &len );
 	MDF_ERROR_CHECK( NULL == p_sub, MDF_FAIL, "Failt to read sub item\n");
@@ -938,7 +943,7 @@ static mdf_err_t _alarm_set( uint64_t *p_id, const uint8_t *p_src, char **pp_err
 	MDF_ERROR_GOTO( -1 == idx &&( *pp_error = (char *)malloc_copy_str("Failt to add to flash!") , 1), \
 		End, "Failt to add to flash.\n");
 	
-	rc = _item_sub_add_save(_SCH_CMD_ALAM, idx, (char *)p_src);
+	rc = _item_sub_add_save(_SCH_CMD_ALAM, id, (char *)p_src);
 	rc = _tapsch_sub_save(id, (char *)p_src, pp_error);
 	*p_id = id;
 End:
@@ -1152,7 +1157,7 @@ static mdf_err_t _tapsch_single_set(char *p_json, uint64_t *p_id, char **pp_erro
 	MDF_ERROR_GOTO( -1 == idx &&( *pp_error = (char *)malloc_copy_str("Failt to add to flash!") , 1), \
 		End, "Failt to add to flash.\n");
 	
-	rc = _item_sub_add_save(_SCH_CMD_TAP, idx, p_json);
+	rc = _item_sub_add_save(_SCH_CMD_TAP, tap_id, p_json);
 	MDF_ERROR_GOTO( MDF_OK != rc, End, "Failt to add sub item.\n");
 
 		
@@ -1403,7 +1408,7 @@ static mdf_err_t _tap_sch_del_one(_Sch_type_t type, Item_t  *p_item){
 	** 2. delete sub item.
 	***/
 	
-	rc = item_sub_del( type , p_item->idx);
+	rc = item_sub_del( type , p_item->sch_time_key);
 	/***
 	** 3. remove key from list.
 	*******/ 
@@ -2209,7 +2214,7 @@ static mdf_err_t _sch_loop_detect(void *p_arg){
 mdf_err_t schedule_init(void){
 	Sch_had_t *p_had = NULL;
 	int len = 0;
-	esp_log_level_set(TAG, ESP_LOG_WARN);
+	esp_log_level_set(TAG, ESP_LOG_WARN);//ESP_LOG_WARN
 
 	if(utlis_store_blob_get( US_SPA_SCH, "schedule_nums", (void **)&p_had, (size_t *)&len) != ESP_OK){
 		_ctl.p_had[_SCH_CMD_TAP].nums = 0;
