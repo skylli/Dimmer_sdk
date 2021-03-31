@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-03-29 17:58:40
+ * @LastEditTime: 2021-03-31 13:50:00
  * @LastEditors: Please set LastEditors
  * @Description: 设备信息，特性注册，接口提供
  * @FilePath: \mqtt_example\components\light_device\light_device.c
@@ -713,8 +713,8 @@ mdf_err_t light_get_wifi_config(){
     mwifi_init_config_t init_config   = MWIFI_INIT_CONFIG_DEFAULT();
 
 	mwifi_config_t ap_config     = {
-        .router_ssid     = "showhome_root",//"showdow",//CONFIG_ROUTER_SSID,
-       	.router_password = "showhomeroot",//"!@#sky141516",//CONFIG_ROUTER_PASSWORD,
+        //.router_ssid     = "showhome_root",//"showdow",//CONFIG_ROUTER_SSID,
+       	//.router_password = "showhomeroot",//"!@#sky141516",//CONFIG_ROUTER_PASSWORD,
         .mesh_id         = CONFIG_MESH_ID,
         .mesh_password   = CONFIG_MESH_PASSWORD,
     };
