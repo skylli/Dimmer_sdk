@@ -1,7 +1,7 @@
 /*
  * @Author: sky
  * @Date: 2020-03-09 18:34:28
- * @LastEditTime: 2021-03-31 13:53:56
+ * @LastEditTime: 2021-04-09 09:59:37
  * @LastEditors: Please set LastEditors
  * @Description: 设备对外的 api 接口实现
  * @FilePath: \mqtt_example\components\light_device\light_handle.c
@@ -999,7 +999,7 @@ mdf_err_t light_device_init(){
 	sprintf((char *)p_name, _MAC_STR_FORMAT, PR_MAC2STR(self_mac) );
 	// todo set CONFIG_LIGHT_VERSIONP
 	// todo  
-    MDF_ERROR_ASSERT( mlink_add_device(MWIFI_ID, (const char *)p_name, "V0.7.10" ));
+    MDF_ERROR_ASSERT( mlink_add_device(MWIFI_ID, (const char *)p_name, "V0.7.12" ));
 
 	// device init
 	device_init();
